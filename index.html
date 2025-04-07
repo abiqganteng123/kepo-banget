@@ -33,6 +33,9 @@
             font-weight: bold;
             position: relative;
         }
+        .admin-header {
+            background-color: #f44336;
+        }
         .admin-badge {
             position: absolute;
             right: 15px;
@@ -314,7 +317,7 @@
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
+        <div class="chat-header" id="chat-header">
             Ngobrol Apa Aja
             <div id="admin-badge" class="admin-badge" style="display: none;">ADMIN</div>
         </div>
@@ -412,6 +415,11 @@
         const database = getDatabase(app);
         const messagesRef = ref(database, 'messages');
 
+        // LocalStorage keys
+        const STORAGE_KEY = 'ngobrolApaAja';
+        const PROFILE_KEY = `${STORAGE_KEY}_profile`;
+        const ADMIN_KEY = `${STORAGE_KEY}_admin`;
+
         let currentUser = {
             name: '',
             bio: '',
@@ -439,6 +447,10 @@
         const previewImageContainer = document.getElementById('preview-image-container');
         const previewImage = document.getElementById('preview-image');
         const adminBadge = document.getElementById('admin-badge');
+        const chatHeader = document.getElementById('chat-header');
+
+        // Initialize the app
+        initApp();
 
         // Close buttons
         document.querySelectorAll('.modal-close').forEach(closeBtn => {
@@ -478,6 +490,50 @@
         document.querySelectorAll('.profile-form input').forEach(input => {
             input.addEventListener('input', updateProfilePreview);
         });
+
+        function initApp() {
+            // Load profile from localStorage if exists
+            const savedProfile = localStorage.getItem(PROFILE_KEY);
+            const isAdmin = localStorage.getItem(ADMIN_KEY) === 'true';
+            
+            if (savedProfile) {
+                currentUser = JSON.parse(savedProfile);
+                currentUser.isAdmin = isAdmin;
+                
+                // Fill form fields
+                document.getElementById('username').value = currentUser.name;
+                document.getElementById('bio').value = currentUser.bio;
+                
+                // Update profile image if exists
+                if (currentUser.profileImage) {
+                    updateProfileImage(currentUser.profileImage);
+                }
+                
+                // Update preview
+                updateProfilePreview();
+                
+                // If profile is complete, hide profile section
+                if (currentUser.name) {
+                    profileSection.style.display = 'none';
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    
+                    // Show admin features if admin
+                    if (currentUser.isAdmin) {
+                        setupAdminFeatures();
+                    }
+                    
+                    // Load messages
+                    loadMessages();
+                }
+            }
+        }
+
+        function setupAdminFeatures() {
+            adminBadge.style.display = 'block';
+            broadcastButton.style.display = 'block';
+            chatHeader.classList.add('admin-header');
+        }
 
         function handleImageUpload(e) {
             const file = e.target.files[0];
@@ -523,6 +579,9 @@
                 return;
             }
             
+            // Save to localStorage
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(currentUser));
+            
             profileSection.style.display = 'none';
             messageInput.disabled = false;
             sendButton.disabled = false;
@@ -539,10 +598,13 @@
             if (password === '1933') {
                 currentUser.isAdmin = true;
                 currentUser.name = "Admin";
+                
+                // Save admin status to localStorage
+                localStorage.setItem(ADMIN_KEY, 'true');
+                localStorage.setItem(PROFILE_KEY, JSON.stringify(currentUser));
+                
                 adminModal.style.display = 'none';
-                adminBadge.style.display = 'block';
-                broadcastButton.style.display = 'block';
-                document.querySelector('.chat-header').style.backgroundColor = '#f44336';
+                setupAdminFeatures();
                 profileSection.style.display = 'none';
                 messageInput.disabled = false;
                 sendButton.disabled = false;
