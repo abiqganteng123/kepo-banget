@@ -398,7 +398,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCz1ea6vDfw1hgt76kAHTuTPatnoiEWtPk",
@@ -523,7 +523,7 @@
                         setupAdminFeatures();
                     }
                     
-                    // Load messages
+                    // Load messages from Firebase
                     loadMessages();
                 }
             }
@@ -589,7 +589,7 @@
             // Add welcome message
             addSystemMessage(`${currentUser.name} telah bergabung dalam obrolan`);
             
-            // Load messages
+            // Load messages from Firebase
             loadMessages();
         }
 
